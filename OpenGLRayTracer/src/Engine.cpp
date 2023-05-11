@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "shaderBackup.h"
 
 namespace {  // Helper functions that do not need (or can't have in case of callback) access to class members
     unsigned int compileShader(unsigned int type, const std::string& source) {
@@ -33,12 +34,14 @@ namespace {  // Helper functions that do not need (or can't have in case of call
 
     void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-        engine->updateCamera(xpos, ypos);
+        engine->updateCamera((float)xpos, (float)ypos);
     }
 
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // capture mouse
+            glfwSetCursorPosCallback(window, mouse_callback);
+        }
     }
 
     void createFullscreenQuad() {
@@ -80,13 +83,16 @@ unsigned int Engine::CreateShader(const ShaderProgramSource& source) {
 
 Engine::ShaderProgramSource Engine::parseGLSL(const std::string& vertexPath, const std::string& fragmentPath) {
     std::ifstream stream(vertexPath);
-    std::string line;
-    std::stringstream ss[2];
-    while (getline(stream, line)) { ss[0] << line << '\n'; }
-    stream.close();
-    stream.open(fragmentPath);
-    while (getline(stream, line)) { ss[1] << line << '\n'; }
-    return { ss[0].str(), ss[1].str() };
+    if (stream.is_open()) {
+        std::string line;
+        std::stringstream ss[2];
+        while (getline(stream, line)) { ss[0] << line << '\n'; }
+        stream.close();
+        stream.open(fragmentPath);
+        while (getline(stream, line)) { ss[1] << line << '\n'; }
+        return { ss[0].str(), ss[1].str() };
+    }
+    else return { vertexBackup, fragmentBackup };
 }
 
 Engine::ShaderProgramSource Engine::parseShader(const std::string& filePath) {
@@ -171,15 +177,18 @@ int Engine::draw() {
     auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdate).count();
     if (elapsedMs >= 1000) {
         float fps = frames / ((float)elapsedMs / 1000);
-        std::cout << "fps: " << fps << std::endl;
         frames = 0;
         lastUpdate = now;
+
+        //std::cout << "fps: " << fps << std::endl;
+        std::string title = "OpenGL, " + std::to_string((int)fps) + "fps";
+        glfwSetWindowTitle(window, title.c_str());
     }
     glfwPollEvents();
     return glfwWindowShouldClose(window);
 }
 
-void Engine::updateCamera(double newX, double newY) {
+void Engine::updateCamera(float newX, float newY) {
     camera.ProcessMouseMovement(lastMouseX - newX, newY - lastMouseY, true);
     lastMouseX = newX;
     lastMouseY = newY;
@@ -205,7 +214,8 @@ void Engine::update() {
         camera.ProcessKeyboard(DOWN, lastFrameTime);
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // capture mouse
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetCursorPosCallback(window, nullptr);
     }
 }
 

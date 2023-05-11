@@ -1,3 +1,17 @@
+#pragma once
+
+const char* vertexBackup = R"(
+#version 330 core
+
+layout(location = 0) in vec4 position;
+
+void main() {
+	gl_Position = position;
+};
+
+)";
+
+const char* fragmentBackup = R"(
 #version 330 core
 
 #define FLT_MAX 3.402823466e+38
@@ -102,3 +116,5 @@ void main() {
 	else
 		color = vec4(0);
 };
+
+)";

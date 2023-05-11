@@ -18,7 +18,7 @@ public:  // Should probably be private in the future, but this helps for testing
 	GLFWwindow* window;
 	unsigned int shader;
 	int windowWidth, windowHeight;
-	double lastMouseX, lastMouseY;
+	float lastMouseX, lastMouseY;
 
 	Camera camera;
 
@@ -37,13 +37,13 @@ public:  // Should probably be private in the future, but this helps for testing
 	unsigned int CreateShader(const ShaderProgramSource& source);
 
 public:
-	Engine(int width = 1280, int height = 720, const std::string& vertexPath = "res/shaders/vertex.glsl",
+	Engine(int width = 1920, int height = 1080, const std::string& vertexPath = "res/shaders/vertex.glsl",
 		const std::string& fragmentPath = "res/shaders/fragment.glsl");
 	~Engine();
 	int draw();
 	void update();
 	void updateWindowUniform();
-	void updateCamera(double newX, double newY);
+	void updateCamera(float newX, float newY);
 	float getLastFrametime() { return lastFrameTime; }
 	float getTime();
 };

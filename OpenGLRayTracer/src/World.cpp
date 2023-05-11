@@ -2,7 +2,7 @@
 
 void World::updateShaderObjectCount(int shader) {
 	int loc = glGetUniformLocation(shader, "numSpheres");
-	glUniform1i(loc, objects.size());
+	glUniform1i(loc, (int)objects.size());
 }
 
 void World::updateShader(int shader) {

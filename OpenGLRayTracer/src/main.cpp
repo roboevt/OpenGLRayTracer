@@ -15,15 +15,19 @@ int main(void) {
     sphere1.radius = 1;
     sphere1.material.color = glm::vec3(1, .3, 1);
 
-    world.addObject(std::make_unique<Sphere>(sphere1));
-
-
     Sphere sphere2;
     sphere2.worldLocation = glm::vec3(0, 1, 6);
     sphere2.radius = 1;
     sphere2.material.color = glm::vec3(.2, .3, 1);
-    
+
+    Sphere sphere3;
+    sphere3.worldLocation = glm::vec3(0, -1000, 6);
+    sphere3.radius = 999;
+    sphere3.material.color = glm::vec3(.2, .2, .2);
+
+    world.addObject(std::make_unique<Sphere>(sphere1));
     world.addObject(std::make_unique<Sphere>(sphere2));
+    world.addObject(std::make_unique<Sphere>(sphere3));
 
     while (!engine.draw()) {
         engine.update();
