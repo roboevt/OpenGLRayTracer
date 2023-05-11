@@ -28,6 +28,10 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
         Position -= Right * velocity;
     if (direction == RIGHT)
         Position += Right * velocity;
+    if (direction == UP)
+        Position += Up * velocity;
+    if (direction == DOWN)
+        Position -= Up * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
@@ -48,14 +52,6 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 
     // update Front, Right and Up Vectors using the updated Euler angles
     updateCameraVectors();
-}
-
-void Camera::ProcessMouseScroll(float yoffset) {
-    Zoom -= (float)yoffset;
-    if (Zoom < 1.0f)
-        Zoom = 1.0f;
-    if (Zoom > 45.0f)
-        Zoom = 45.0f;
 }
 
 void Camera::updateCameraVectors() {

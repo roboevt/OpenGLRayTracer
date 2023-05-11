@@ -31,6 +31,16 @@ namespace {  // Helper functions that do not need (or can't have in case of call
         engine->draw();
     }
 
+    void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+        Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+        engine->updateCamera(xpos, ypos);
+    }
+
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // capture mouse
+    }
+
     void createFullscreenQuad() {
         float positions[] = {
         -1, -1,
@@ -87,24 +97,24 @@ Engine::ShaderProgramSource Engine::parseShader(const std::string& filePath) {
     std::string line;
     std::stringstream ss[2];
     ShaderType type = ShaderType::NONE;
-    while (getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos) {
-                type = ShaderType::VERTEX;
-            }
-            else if (line.find("fragment") != std::string::npos) {
-                type = ShaderType::FRAGMENT;
-            }
+while (getline(stream, line)) {
+    if (line.find("#shader") != std::string::npos) {
+        if (line.find("vertex") != std::string::npos) {
+            type = ShaderType::VERTEX;
         }
-        else {
-            if (type != ShaderType::NONE) ss[(int)type] << line << '\n';
+        else if (line.find("fragment") != std::string::npos) {
+            type = ShaderType::FRAGMENT;
         }
     }
-    return { ss[0].str(), ss[1].str() };
+    else {
+        if (type != ShaderType::NONE) ss[(int)type] << line << '\n';
+    }
+}
+return { ss[0].str(), ss[1].str() };
 }
 
 void Engine::loadShaders(const std::string& vertexPath, const std::string& fragmentPath) {
-	ShaderProgramSource source = parseGLSL(vertexPath, fragmentPath);
+    ShaderProgramSource source = parseGLSL(vertexPath, fragmentPath);
     shader = CreateShader(source);
     glUseProgram(shader);
     updateWindowUniform();
@@ -132,6 +142,9 @@ Engine::Engine(int width, int height, const std::string& vertexPath,
     glfwSwapInterval(0); // request no vsync
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // capture mouse
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     if (glewInit() != GLEW_OK) throw "GLEW failed to initialize";
     std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;
@@ -164,6 +177,36 @@ int Engine::draw() {
     }
     glfwPollEvents();
     return glfwWindowShouldClose(window);
+}
+
+void Engine::updateCamera(double newX, double newY) {
+    camera.ProcessMouseMovement(lastMouseX - newX, newY - lastMouseY, true);
+    lastMouseX = newX;
+    lastMouseY = newY;
+}
+
+void Engine::update() {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera.ProcessKeyboard(BACKWARD, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera.ProcessKeyboard(LEFT, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera.ProcessKeyboard(FORWARD, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera.ProcessKeyboard(RIGHT, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        camera.ProcessKeyboard(UP, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        camera.ProcessKeyboard(DOWN, lastFrameTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // capture mouse
+    }
 }
 
 float Engine::getTime() {

@@ -18,6 +18,7 @@ struct Sphere {
 };
 
 uniform Sphere spheres[10];
+uniform int numSpheres;
 
 struct Ray {
 	vec3 origin;
@@ -81,7 +82,7 @@ RayCollision trace(Ray ray) {
 	RayCollision nearest;
 	nearest.distance = FLT_MAX;
 
-	for(int i = 0; i < 2; i++) {  // TODO pass current number of spheres
+	for(int i = 0; i < numSpheres; i++) {  // TODO pass current number of spheres
 		Sphere sphere = spheres[i];
 		RayCollision col = RaySphereIntersection(ray, sphere);
 

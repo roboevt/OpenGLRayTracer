@@ -9,6 +9,8 @@
 #include <string>
 #include <chrono>
 
+#include "Camera.h"
+
 
 class Engine
 {
@@ -16,10 +18,15 @@ public:  // Should probably be private in the future, but this helps for testing
 	GLFWwindow* window;
 	unsigned int shader;
 	int windowWidth, windowHeight;
+	double lastMouseX, lastMouseY;
+
+	Camera camera;
+
 	struct ShaderProgramSource {
 		std::string VertexSource;
 		std::string FragmentSource;
 	};
+
 	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdate, lastFrame;
 	float lastFrameTime;
 	int frames;
@@ -30,11 +37,13 @@ public:  // Should probably be private in the future, but this helps for testing
 	unsigned int CreateShader(const ShaderProgramSource& source);
 
 public:
-	Engine(int width = 640, int height = 480, const std::string& vertexPath = "res/shaders/vertex.glsl",
+	Engine(int width = 1280, int height = 720, const std::string& vertexPath = "res/shaders/vertex.glsl",
 		const std::string& fragmentPath = "res/shaders/fragment.glsl");
 	~Engine();
 	int draw();
+	void update();
 	void updateWindowUniform();
+	void updateCamera(double newX, double newY);
 	float getLastFrametime() { return lastFrameTime; }
 	float getTime();
 };
