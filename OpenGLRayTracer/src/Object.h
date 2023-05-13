@@ -6,7 +6,9 @@
 #include <string>
 
 struct Material {
-	glm::vec3 color;
+	glm::vec3 diffuseColor;
+	glm::vec3 emissionColor;
+	float emissionStrength;
 };
 
 class Object {

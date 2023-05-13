@@ -3,48 +3,47 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <chrono>
 
+#include "Shader.h"
 #include "Camera.h"
 
 
-class Engine
-{
-public:  // Should probably be private in the future, but this helps for testing/dev
+class Engine {
+private:  // TODO change back to private, but this helps for testing/dev
 	GLFWwindow* window;
-	unsigned int shader;
 	int windowWidth, windowHeight;
+
+	unsigned int fbo[2];
+	unsigned char activeFBO;
+
+	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdateTime, lastFrameTime;
+
 	float lastMouseX, lastMouseY;
+	float lastFrameDuration;
+	unsigned int frames, lastFrames;
+	int samples;
 
 	Camera camera;
+	Shader rayShader, screenShader;
+	unsigned int textureColorbuffer;
 
-	struct ShaderProgramSource {
-		std::string VertexSource;
-		std::string FragmentSource;
-	};
-
-	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdate, lastFrame;
-	float lastFrameTime;
-	int frames;
-
-	void loadShaders(const std::string& vertexPath, const std::string& fragmentPath);
-	ShaderProgramSource parseGLSL(const std::string& vertexPath, const std::string& fragmentPath);
-	static ShaderProgramSource parseShader(const std::string& filePath);
-	unsigned int CreateShader(const ShaderProgramSource& source);
-
+	void updateKeyboard();
+	void updateUniforms();
+	void updateFPS();
 public:
-	Engine(int width = 1920, int height = 1080, const std::string& vertexPath = "res/shaders/vertex.glsl",
-		const std::string& fragmentPath = "res/shaders/fragment.glsl");
+	Engine(int width = 1920, int height = 1080, int samples = 16);
+	void setShaders(Shader rayShader, Shader screenShader);
 	~Engine();
 	int draw();
 	void update();
-	void updateWindowUniform();
-	void updateCamera(float newX, float newY);
-	float getLastFrametime() { return lastFrameTime; }
+	void moveCamera(float newX, float newY);
+	float getLastFrametime();
 	float getTime();
+	glm::mat4 getViewMatrix();
+	int getShader();
+	int getSamples();
+	void setSamples(int samples);
 };
 

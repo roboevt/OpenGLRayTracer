@@ -18,7 +18,9 @@ void Sphere::sendField(int shader, int index, const std::string& name, glm::vec3
 void Sphere::sendToShader(int shader, int index) {
 	sendField(shader, index, "location", cameraLocation);
 	sendField(shader, index, "radius", radius);
-	sendField(shader, index, "color", material.color);
+	sendField(shader, index, "diffuseColor", material.diffuseColor);
+	sendField(shader, index, "emissionColor", material.emissionColor);
+	sendField(shader, index, "emissionStrength", material.emissionStrength);
 }
 
 void Sphere::applyMVP(glm::mat4 mvp) {

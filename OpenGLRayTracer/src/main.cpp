@@ -10,30 +10,52 @@ int main(void) {
 
     World world = World();
 
+    Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
+
+    Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag");
+
+    engine.setShaders(rayShader, screenShader);
+
     Sphere sphere1;
-    sphere1.worldLocation = glm::vec3(0, 0, 6);
-    sphere1.radius = 1;
-    sphere1.material.color = glm::vec3(1, .3, 1);
+    sphere1.worldLocation = glm::vec3(2);
+    sphere1.radius = .5;
+    sphere1.material.diffuseColor = glm::vec3(1);
+    sphere1.material.emissionColor = glm::vec3(1);
+    sphere1.material.emissionStrength = 10;
 
     Sphere sphere2;
     sphere2.worldLocation = glm::vec3(0, 1, 6);
     sphere2.radius = 1;
-    sphere2.material.color = glm::vec3(.2, .3, 1);
+    sphere2.material.diffuseColor = glm::vec3(1);
+    sphere2.material.emissionColor = glm::vec3(1);
+    sphere2.material.emissionStrength = 0;
 
     Sphere sphere3;
-    sphere3.worldLocation = glm::vec3(0, -1000, 6);
-    sphere3.radius = 999;
-    sphere3.material.color = glm::vec3(.2, .2, .2);
+    sphere3.worldLocation = glm::vec3(0, -10000, 6);
+    sphere3.radius = 10000;
+    sphere3.material.diffuseColor = glm::vec3(.2, .2, .2);
+    sphere3.material.emissionColor = glm::vec3(1);
+    sphere3.material.emissionStrength = 0;
+
+    Sphere sphere4;
+    sphere4.worldLocation = glm::vec3(1, .5, 5);
+    sphere4.radius = .5;
+    sphere4.material.diffuseColor = glm::vec3(1, .2, .2);
+    sphere4.material.emissionColor = glm::vec3(1);
+    sphere4.material.emissionStrength = 0;
 
     world.addObject(std::make_unique<Sphere>(sphere1));
     world.addObject(std::make_unique<Sphere>(sphere2));
     world.addObject(std::make_unique<Sphere>(sphere3));
+    world.addObject(std::make_unique<Sphere>(sphere4));
+
+    
 
     while (!engine.draw()) {
         engine.update();
         //engine.camera.Position.y = sin(engine.getTime());
-        world.applyMVP(engine.camera.GetViewMatrix());
-        world.updateShader(engine.shader);
+        world.applyMVP(engine.getViewMatrix());
+        world.updateShader(engine.getShader());
     }
     return 0;
 }
