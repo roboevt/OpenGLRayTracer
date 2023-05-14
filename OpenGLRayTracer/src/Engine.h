@@ -15,8 +15,7 @@ private:
 	GLFWwindow* window;
 	int windowWidth, windowHeight;
 
-	unsigned int fbo[2], colorAttachment[2];
-	unsigned char activeFBO;
+	unsigned int fbo, bufferTexture;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdateTime, lastFrameTime;
 
@@ -28,11 +27,13 @@ private:
 	Camera camera;
 	Shader rayShader, screenShader;
 
-	int createFBOs();
+	int createFBO();
 
 	void updateKeyboard();
 	void updateUniforms();
 	void updateFPS();
+
+	void clearBuffer();
 public:
 	Engine(int width = 1920, int height = 1080, int samples = 16);
 	void setShaders(Shader rayShader, Shader screenShader);
@@ -46,5 +47,6 @@ public:
 	int getShader();
 	int getSamples();
 	void setSamples(int samples);
+	void setWindowSize(int width, int height);
 };
 

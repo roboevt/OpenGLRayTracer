@@ -14,6 +14,8 @@ int main(void) {
     Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag");
     engine.setShaders(rayShader, screenShader);
 
+    engine.setWindowSize(1920, 1080);
+
     Sphere sphere1;
     sphere1.worldLocation = glm::vec3(2);
     sphere1.radius = .5;

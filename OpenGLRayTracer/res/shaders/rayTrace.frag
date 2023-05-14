@@ -4,7 +4,8 @@
 #define UINT_MAX 4294967295
 #define MAX_BOUNCES 5
 
-layout(location = 0) out vec4 color;
+out vec4 color;
+
 uniform sampler2D previousFrame;
 in vec4 gl_FragCoord;     // current pixel location
 uniform vec2 uResolution; // screen dimensions in pixels
@@ -175,15 +176,13 @@ void main() {
 	vec2 screenLoc = getScreenLoc(gl_FragCoord.xy);
 
 	Ray cameraRay = getCameraRay(screenLoc);
-	vec3 pixelColor = vec3(0);
+	vec3 newColor = vec3(0);
 	for(int i = 0; i < samples; i++) {
-		uint state = ((frames +uint(i) + 1u) * 345u) * uint(gl_FragCoord.x + gl_FragCoord.y * uResolution.x);
-		pixelColor += trace(cameraRay, state);
+		uint state = ((frames +uint(i) + 1u) * 3459054u) * uint(gl_FragCoord.x + gl_FragCoord.y * uResolution.x);
+		newColor += trace(cameraRay, state);
 	}
-	pixelColor /= samples;
+	newColor /= samples;
 
-	float weight = 1.0 / (int(frames) + 1);
-	vec3 lastFrame = texture(previousFrame, gl_FragCoord.xy / uResolution).xyz;
-	vec3 average = lastFrame * (1 - weight) + pixelColor * weight;
-	color = vec4(average, 1);
+	vec3 previousColor = texture(previousFrame, gl_FragCoord.xy / uResolution).xyz;
+	color = vec4(previousColor + newColor, 1);
 };
