@@ -11,11 +11,11 @@
 
 
 class Engine {
-private:  // TODO change back to private, but this helps for testing/dev
+private:
 	GLFWwindow* window;
 	int windowWidth, windowHeight;
 
-	unsigned int fbo[2];
+	unsigned int fbo[2], colorAttachment[2];
 	unsigned char activeFBO;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdateTime, lastFrameTime;
@@ -27,7 +27,8 @@ private:  // TODO change back to private, but this helps for testing/dev
 
 	Camera camera;
 	Shader rayShader, screenShader;
-	unsigned int textureColorbuffer;
+
+	int createFBOs();
 
 	void updateKeyboard();
 	void updateUniforms();

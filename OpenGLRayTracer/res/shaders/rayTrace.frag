@@ -5,6 +5,7 @@
 #define MAX_BOUNCES 5
 
 layout(location = 0) out vec4 color;
+uniform sampler2D previousFrame;
 in vec4 gl_FragCoord;     // current pixel location
 uniform vec2 uResolution; // screen dimensions in pixels
 uniform uint frames;
@@ -180,5 +181,9 @@ void main() {
 		pixelColor += trace(cameraRay, state);
 	}
 	pixelColor /= samples;
-	color = vec4(pixelColor, 1);
+
+	float weight = 1.0 / (int(frames) + 1);
+	vec3 lastFrame = texture(previousFrame, gl_FragCoord.xy / uResolution).xyz;
+	vec3 average = lastFrame * (1 - weight) + pixelColor * weight;
+	color = vec4(average, 1);
 };

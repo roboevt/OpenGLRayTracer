@@ -11,9 +11,7 @@ int main(void) {
     World world = World();
 
     Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
-
     Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag");
-
     engine.setShaders(rayShader, screenShader);
 
     Sphere sphere1;
@@ -49,11 +47,8 @@ int main(void) {
     world.addObject(std::make_unique<Sphere>(sphere3));
     world.addObject(std::make_unique<Sphere>(sphere4));
 
-    
-
     while (!engine.draw()) {
         engine.update();
-        //engine.camera.Position.y = sin(engine.getTime());
         world.applyMVP(engine.getViewMatrix());
         world.updateShader(engine.getShader());
     }

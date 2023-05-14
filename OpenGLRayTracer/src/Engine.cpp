@@ -13,6 +13,7 @@ namespace {  // Helper functions that do not need (or can't have in case of call
             fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
                 (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
                 type, severity, message);
+            //exit(1);
         }
     }
 
@@ -53,8 +54,7 @@ namespace {  // Helper functions that do not need (or can't have in case of call
 
         1, 1,
         -1, 1,
-        -1, -1
-        };
+        -1, -1 };
 
         unsigned int buffer;
         glGenBuffers(1, &buffer);
@@ -79,7 +79,7 @@ Engine::Engine(int width, int height, int samples) : windowWidth(width), windowH
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0); // request no vsync
+    //glfwSwapInterval(0); // request no vsync
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // capture mouse
@@ -94,92 +94,101 @@ Engine::Engine(int width, int height, int samples) : windowWidth(width), windowH
     glDebugMessageCallback(MessageCallback, 0);
 
     createFullscreenQuad();
-
     moveCamera(0, 0);
+    createFBOs();
+}
 
+int Engine::createFBOs() {
     glCreateFramebuffers(2, fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo[activeFBO]);
-    // create a color attachment texture
-    unsigned int textureColorbuffer;
-    glCreateTextures(GL_TEXTURE_2D, 1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glCreateTextures(GL_TEXTURE_2D, 2, colorAttachment);
+    for (int i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo[i]);
+        
+        glBindTexture(GL_TEXTURE_2D, colorAttachment[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorAttachment[i], 0);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "Error creating framebuffer with status: " 
-            << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorAttachment[i], 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            std::cout << "Error creating framebuffer with status: "
+                << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
+            return 1;
+        }
     }
+    return 0;
 }
 
 void Engine::setShaders(Shader rayShader, Shader screenShader) {
     this->rayShader = rayShader;
-    //glUseProgram(rayShader);
     this->screenShader = screenShader;
-    //glUseProgram(screenShader);
 }
 
 int Engine::draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[activeFBO]);
+    glBindTexture(GL_TEXTURE_2D, colorAttachment[!activeFBO]);  // bind other (previous) texture for use in ray shader
     glUseProgram(rayShader);
-    
-    //createFullscreenQuad();
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 6);  // draw this ray tracing to FBO color attachment texture
 
     glUseProgram(screenShader);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, colorAttachment[activeFBO]);  // bind just rendered frame texture
     
     glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 6);  // draw just rendered frame to screen
 
-    //createFullscreenQuad();
-    
-    //glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    activeFBO = !activeFBO;
 
-    //activeFBO = !activeFBO;
-
-    glUseProgram(rayShader);
+    glUseProgram(rayShader);  // get ready for updating uniforms
     glfwSwapBuffers(window);
     glfwPollEvents();
     return glfwWindowShouldClose(window);
 }
 
 void Engine::moveCamera(float newX, float newY) {
+    bool anyMovement = newX != lastMouseX || newY != lastMouseY;
     camera.ProcessMouseMovement(lastMouseX - newX, newY - lastMouseY, true);
     lastMouseX = newX;
     lastMouseY = newY;
+    frames *= !anyMovement;  // if (anyMovement) frames = 0;  // practicing branchless programming
 }
 
 void Engine::updateKeyboard() {
+    bool anyMovement = false;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera.ProcessKeyboard(BACKWARD, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         camera.ProcessKeyboard(LEFT, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         camera.ProcessKeyboard(FORWARD, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         camera.ProcessKeyboard(UP, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         camera.ProcessKeyboard(DOWN, lastFrameDuration);
+        anyMovement = true;
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetCursorPosCallback(window, nullptr);
     }
+    frames *= !anyMovement;
 }
 
 void Engine::updateUniforms() {
@@ -197,6 +206,11 @@ void Engine::updateUniforms() {
 
     loc = glGetUniformLocation(rayShader, "frames");
     glUniform1ui(loc, frames);
+    
+    glUseProgram(screenShader);
+    loc = glGetUniformLocation(screenShader, "uResolution");
+    glUniform2f(loc, (float)windowWidth, (float)windowHeight);
+    glUseProgram(rayShader);
 }
 
 void Engine::updateFPS() {
@@ -236,7 +250,7 @@ int Engine::getShader() { return rayShader; }
 
 int Engine::getSamples() { return samples; }
 
-void Engine::setSamples(int samples) { this->samples = samples; }
+void Engine::setSamples(int samples) { if(samples) this->samples = samples; }
 
 Engine::~Engine() {
     glfwTerminate();
