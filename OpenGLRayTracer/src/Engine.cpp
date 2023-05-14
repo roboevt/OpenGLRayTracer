@@ -5,6 +5,17 @@
 #include <sstream>
 
 namespace {  // Helper functions that do not need (or can't have in case of callback) access to class members
+
+    void GLAPIENTRY
+        MessageCallback(GLenum source, GLenum type, GLuint id,
+            GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+        if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_HIGH) {
+            fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+                (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+                type, severity, message);
+        }
+    }
+
     void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
         Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
@@ -79,23 +90,30 @@ Engine::Engine(int width, int height, int samples) : windowWidth(width), windowH
     if (glewInit() != GLEW_OK) throw "GLEW failed to initialize";
     std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;
 
+    glEnable(GL_DEBUG_OUTPUT);  // debug messages
+    glDebugMessageCallback(MessageCallback, 0);
+
     createFullscreenQuad();
 
     moveCamera(0, 0);
 
-    glGenFramebuffers(2, fbo);
+    glCreateFramebuffers(2, fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[activeFBO]);
     // create a color attachment texture
     unsigned int textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "Error creating framebuffer" << std::endl;
+        std::cout << "Error creating framebuffer with status: " 
+            << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
     }
 }
 
@@ -110,24 +128,24 @@ int Engine::draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[activeFBO]);
     glUseProgram(rayShader);
     
-    createFullscreenQuad();
+    //createFullscreenQuad();
 
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
     glUseProgram(screenShader);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     glClear(GL_COLOR_BUFFER_BIT);
 
-    createFullscreenQuad();
+    //createFullscreenQuad();
     
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    //glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     //activeFBO = !activeFBO;
 
+    glUseProgram(rayShader);
     glfwSwapBuffers(window);
     glfwPollEvents();
     return glfwWindowShouldClose(window);

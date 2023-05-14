@@ -8,5 +8,5 @@ void main() {
     //vec2 screenLoc = gl_FragCoord.xy / uResolution;
     color = vec4(1,0,0,1);
     //color = texture(screenTexture, screenLoc);
-    color = texture(screenTexture, vec2(.5,.5));
+    color = texture(screenTexture, gl_FragCoord.xy / vec2(1920,1080));
 }
