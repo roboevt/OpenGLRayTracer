@@ -3,8 +3,8 @@ out vec4 color;
 
 uniform sampler2D screenTexture;
 uniform vec2 uResolution; // screen dimensions in pixels
-uniform uint frames;
+uniform uint frames;  // frames since last movement
 
 void main() { 
-    color = texture(screenTexture, gl_FragCoord.xy / uResolution) / int(frames);  // TODO could do mult on cpu once
+    color = texture(screenTexture, gl_FragCoord.xy / uResolution) / int(frames);
 }

@@ -1,7 +1,6 @@
 #version 330 core
 
 #define FLT_MAX 3.402823466e+38
-#define UINT_MAX 4294967295
 #define MAX_BOUNCES 5
 
 out vec4 color;
@@ -9,7 +8,7 @@ out vec4 color;
 uniform sampler2D previousFrame;
 in vec4 gl_FragCoord;     // current pixel location
 uniform vec2 uResolution; // screen dimensions in pixels
-uniform uint frames;
+uniform uint frames;      // frames since last camera movement
 uniform mat4 mvp;
 uniform int samples;
 

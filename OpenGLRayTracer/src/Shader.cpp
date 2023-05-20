@@ -1,7 +1,5 @@
 #include "Shader.h"
 
-#include "shaderBackup.h"
-
 #include <GL/glew.h>
 
 #include <iostream>
@@ -12,8 +10,13 @@ Shader::Shader() : shader(0) { }
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
     ShaderProgramSource source = parseGLSL(vertexPath, fragmentPath);
-    shader = CreateShader(source);
-    //glUseProgram(shader);
+    if (source.VertexSource == "" || source.FragmentSource == "") shader = 0;
+    else shader = createShader(source);
+}
+
+int Shader::create(const std::string& vertexSource, const std::string& fragmentSource) {
+    shader = createShader({ vertexSource, fragmentSource });
+    return shader;
 }
 
 Shader::ShaderProgramSource Shader::parseGLSL(const std::string& vertexPath, const std::string& fragmentPath) {
@@ -29,8 +32,8 @@ Shader::ShaderProgramSource Shader::parseGLSL(const std::string& vertexPath, con
             return { ss[0].str(), ss[1].str() };
         }
     }
-    std::cout << "Could not load shader, falling back to backup" << std::endl;
-    return { vertexBackup, fragmentBackup };
+    std::cout << "Could not load shader. Vertex: " << vertexPath << " Fragment: " << fragmentPath << std::endl;
+    return { "", ""};
 }
 
 Shader::ShaderProgramSource Shader::parseShader(const std::string& filePath) {
@@ -57,10 +60,12 @@ Shader::ShaderProgramSource Shader::parseShader(const std::string& filePath) {
     return { ss[0].str(), ss[1].str() };
 }
 
-unsigned int Shader::CreateShader(const ShaderProgramSource& source) {
+unsigned int Shader::createShader(const ShaderProgramSource& source) {
     unsigned int program = glCreateProgram();
     unsigned int vs = compileShader(GL_VERTEX_SHADER, source.VertexSource);
     unsigned int fs = compileShader(GL_FRAGMENT_SHADER, source.FragmentSource);
+
+    if (vs == 0 || fs == 0) return 0;
 
     glAttachShader(program, vs);
     glAttachShader(program, fs);

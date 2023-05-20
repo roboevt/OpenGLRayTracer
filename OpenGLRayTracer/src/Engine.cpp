@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 
+#include <chrono>
+#include <thread>
+
 namespace {  // Helper functions that do not need (or can't have in case of callback) access to class members
 
     void GLAPIENTRY
@@ -13,7 +16,6 @@ namespace {  // Helper functions that do not need (or can't have in case of call
             fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
                 (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
                 type, severity, message);
-            //exit(1);
         }
     }
 

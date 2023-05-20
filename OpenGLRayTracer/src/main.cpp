@@ -4,14 +4,23 @@
 #include "Engine.h"
 #include "Camera.h"
 #include "World.h"
+#include "shaderBackup.h"
 
-int main(void) {
+#define VERTEX_SOURCE 2
+#define RAY_FRAGMENT_SOURCE 3
+#define SCREEN_FRAGMENT_SOURCE 4
+
+int main(int argc, char* argv[]) {
     Engine engine = Engine();
 
     World world = World();
 
     Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
-    Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag");
+    Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag"); 
+
+    if (!rayShader) rayShader.create(vertexBackup, rayFragmentBackup);
+    if (!screenShader) screenShader.create(vertexBackup, screenFragmentBackup);
+    
     engine.setShaders(rayShader, screenShader);
 
     engine.setWindowSize(1920, 1080);

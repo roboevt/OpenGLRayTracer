@@ -1,6 +1,6 @@
 #pragma once
 
-const char* vertexBackup = R"(
+const std::string vertexBackup = R"(
 #version 330 core
 
 layout(location = 0) in vec4 position;
@@ -11,17 +11,18 @@ void main() {
 
 )";
 
-const char* fragmentBackup = R"(
+const std::string rayFragmentBackup = R"(
 #version 330 core
 
 #define FLT_MAX 3.402823466e+38
-#define UINT_MAX 4294967295
 #define MAX_BOUNCES 5
 
-layout(location = 0) out vec4 color;
+out vec4 color;
+
+uniform sampler2D previousFrame;
 in vec4 gl_FragCoord;     // current pixel location
 uniform vec2 uResolution; // screen dimensions in pixels
-uniform uint frames;
+uniform uint frames;      // frames since last camera movement
 uniform mat4 mvp;
 uniform int samples;
 
@@ -188,13 +189,28 @@ void main() {
 	vec2 screenLoc = getScreenLoc(gl_FragCoord.xy);
 
 	Ray cameraRay = getCameraRay(screenLoc);
-	vec3 pixelColor = vec3(0);
+	vec3 newColor = vec3(0);
 	for(int i = 0; i < samples; i++) {
-		uint state = ((frames +uint(i) + 1u) * 345u) * uint(gl_FragCoord.x + gl_FragCoord.y * uResolution.x);
-		pixelColor += trace(cameraRay, state);
+		uint state = ((frames +uint(i) + 1u) * 3459054u) * uint(gl_FragCoord.x + gl_FragCoord.y * uResolution.x);
+		newColor += trace(cameraRay, state);
 	}
-	pixelColor /= samples;
-	color = vec4(pixelColor, 1);
+	newColor /= samples;
+
+	vec3 previousColor = texture(previousFrame, gl_FragCoord.xy / uResolution).xyz;
+	color = vec4(previousColor + newColor, 1);
 };
 
+)";
+
+const std::string screenFragmentBackup = R"(
+#version 330 core
+out vec4 color;
+
+uniform sampler2D screenTexture;
+uniform vec2 uResolution; // screen dimensions in pixels
+uniform uint frames;  // frames since last movement
+
+void main() { 
+    color = texture(screenTexture, gl_FragCoord.xy / uResolution) / int(frames);
+}
 )";
