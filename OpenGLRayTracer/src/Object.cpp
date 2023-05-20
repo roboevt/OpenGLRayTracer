@@ -21,6 +21,7 @@ void Sphere::sendToShader(int shader, int index) {
 	sendField(shader, index, "diffuseColor", material.diffuseColor);
 	sendField(shader, index, "emissionColor", material.emissionColor);
 	sendField(shader, index, "emissionStrength", material.emissionStrength);
+	sendField(shader, index, "reflectivity", material.reflectivity);
 }
 
 void Sphere::applyMVP(glm::mat4 mvp) {

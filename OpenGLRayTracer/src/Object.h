@@ -9,6 +9,8 @@ struct Material {
 	glm::vec3 diffuseColor;
 	glm::vec3 emissionColor;
 	float emissionStrength;
+	float reflectivity;
+	Material() : diffuseColor(0), emissionColor(0), emissionStrength(0), reflectivity(0) {}
 };
 
 class Object {
