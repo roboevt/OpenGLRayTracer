@@ -14,15 +14,17 @@ class Engine {
 private:
 	GLFWwindow* window;
 	int windowWidth, windowHeight;
+	int samples;
 
 	unsigned int fbo, bufferTexture;
 
-	std::chrono::time_point<std::chrono::high_resolution_clock> startTime, lastUpdateTime, lastFrameTime;
+	std::chrono::time_point<std::chrono::high_resolution_clock> lastUpdateTime, lastFrameTime, startTime;
 
+	
 	float lastMouseX, lastMouseY;
-	float lastFrameDuration;
 	unsigned int frames, lastFrames;
-	int samples;
+	float lastFrameDuration;
+	
 
 	Camera camera;
 	Shader rayShader, screenShader;
@@ -35,7 +37,7 @@ private:
 
 	void clearBuffer();
 public:
-	Engine(int width = 1920, int height = 1080, int samples = 16);
+	Engine(int width = 1920, int height = 1080, int samples = 32);
 	void setShaders(Shader rayShader, Shader screenShader);
 	~Engine();
 	int draw();

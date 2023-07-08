@@ -1,3 +1,4 @@
+#From root project directory (highest level):
 #cmake -B build -S ./src/ -DCMAKE_TOOLCHAIN_FILE=/home/roboevt/dev/c++/OpenGLRayTracer/OpenGLRayTracer/vcpkg/scripts/buildsystems/vcpkg.cmake
 #cmake --build ./build/ --parallel 12
 
@@ -16,7 +17,7 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 
 file(GLOB SOURCES *.cpp)
 
-add_compile_options(-std=c++20 -march=native -fno-omit-frame-pointer)
+add_compile_options(-Wall -std=c++20 -march=native -fno-omit-frame-pointer)
 
 add_executable( OpenGLRayTracer ${SOURCES} )
 

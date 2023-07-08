@@ -10,13 +10,22 @@
 #define RAY_FRAGMENT_SOURCE 3
 #define SCREEN_FRAGMENT_SOURCE 4
 
-int main(int argc, char* argv[]) {
+constexpr auto ROOT = "/home/roboevt/dev/c++/OpenGLRayTracer/OpenGLRayTracer/";
+
+int main() {
     Engine engine = Engine();
 
     World world = World();
 
-    Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
-    Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag"); 
+    //Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
+    //Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag"); 
+
+    const std::string vertexCode = ROOT + std::string("res/shaders/vertex.glsl");
+    const std::string rayFragmentCode = ROOT + std::string("res/shaders/rayTrace.frag");
+    const std::string screenFragmentCode = ROOT + std::string("res/shaders/screen.frag");
+
+    Shader rayShader = Shader(vertexCode, rayFragmentCode);
+    Shader screenShader = Shader(vertexCode, screenFragmentCode); 
 
     if (!rayShader) rayShader.create(vertexBackup, rayFragmentBackup);
     if (!screenShader) screenShader.create(vertexBackup, screenFragmentBackup);
