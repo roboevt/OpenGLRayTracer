@@ -18,11 +18,14 @@ class World {
 		this->triangles.insert(this->triangles.end(), triangles.begin(), triangles.end());
 	}
 
+	void addStl(std::string path);
+
     void updateShader(int shader);
     void applyMVP(glm::mat4 mvp);
 
     static std::vector<Sphere> createSphereTestScene();
+	static std::vector<Triangle> createTestMirror();
 
    private:
-    void updateShaderObjectCount(const std::string& field, int shader);
+    void updateShaderObjectCount(const std::string& field, const int shader, const int count) const;
 };

@@ -35,7 +35,7 @@ struct Triangle {
 	float reflectivity;
 };
 
-uniform Sphere spheres[10];
+uniform Sphere spheres[100];
 uniform int numSpheres;
 
 uniform Triangle triangles[10];

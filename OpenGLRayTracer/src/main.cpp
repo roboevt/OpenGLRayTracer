@@ -30,24 +30,9 @@ int main() {
     engine.setWindowSize(1920, 1080);
 
     world.addSpheres(World::createSphereTestScene());
+    world.addTriangles(World::createTestMirror());
 
-    // Create mirror plane square
-    Triangle triangle1;
-    triangle1.a = glm::vec3(-5, 0, -2);
-    triangle1.b = glm::vec3(5, 0, -2);
-    triangle1.c = glm::vec3(-5, 5, -2);
-    triangle1.material.diffuseColor = glm::vec3(0.9, 0.9, 0.9);
-    triangle1.material.emissionColor = glm::vec3(0, 0, 0);
-    triangle1.material.emissionStrength = 0;
-    triangle1.material.reflectivity = 1;
-
-    Triangle triangle2 = triangle1;
-    triangle2.a = glm::vec3(5, 5, -2);
-    triangle2.b = glm::vec3(-5, 5, -2);
-    triangle2.c = glm::vec3(5, 0, -2);
-
-    world.addTriangle(triangle1);
-    world.addTriangle(triangle2);
+    world.addStl("basic.stl");
 
     while (!engine.draw()) {
         engine.update();

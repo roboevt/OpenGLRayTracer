@@ -37,7 +37,7 @@ private:
 
 	void clearBuffer();
 public:
-	Engine(int width = 1920, int height = 1080, int samples = 32);
+	Engine(int width = 1920, int height = 1080, int samples = 16);
 	void setShaders(Shader rayShader, Shader screenShader);
 	~Engine();
 	int draw();
