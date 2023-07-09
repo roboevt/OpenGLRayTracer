@@ -1,18 +1,28 @@
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "Object.h"
 
-struct World {
-	std::vector<std::unique_ptr<Object>> objects;
-	void addObject(std::unique_ptr<Object> object) { objects.emplace_back(std::move(object)); }
+class World {
+   public:
+    std::vector<Sphere> spheres;
+    void addSphere(Sphere sphere) { spheres.push_back(sphere); }
+    void addSpheres(std::vector<Sphere> spheres) {
+        this->spheres.insert(this->spheres.end(), spheres.begin(), spheres.end());
+    }
+	std::vector<Triangle> triangles;
+	void addTriangle(Triangle triangle) { triangles.push_back(triangle); }
+	void addTriangles(std::vector<Triangle> triangles) {
+		this->triangles.insert(this->triangles.end(), triangles.begin(), triangles.end());
+	}
 
-	void updateShader(int shader);
-	void applyMVP(glm::mat4 mvp);
+    void updateShader(int shader);
+    void applyMVP(glm::mat4 mvp);
 
-private:
-	void updateShaderObjectCount(int shader);
+    static std::vector<Sphere> createSphereTestScene();
+
+   private:
+    void updateShaderObjectCount(const std::string& field, int shader);
 };
-

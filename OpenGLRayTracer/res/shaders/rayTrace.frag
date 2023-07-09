@@ -23,8 +23,23 @@ struct Sphere {
 	float reflectivity;
 };
 
+struct Triangle {
+	vec3 a;
+	vec3 b;
+	vec3 c;
+
+	//Material:
+	vec3 diffuseColor;
+	vec3 emissionColor;
+	float emissionStrength;
+	float reflectivity;
+};
+
 uniform Sphere spheres[10];
 uniform int numSpheres;
+
+uniform Triangle triangles[10];
+uniform int numTriangles;
 
 struct Ray {
 	vec3 origin;
@@ -107,8 +122,10 @@ Ray getCameraRay(vec2 screenLoc) {
 }
 
 //https://www.youtube.com/watch?v=Qz0KTGYJtUk
-RayCollision RaySphereIntersection(Ray ray, Sphere sphere) {
+RayCollision RaySphereIntersection(Ray ray, Sphere sphere, float minT) {
 	RayCollision col;
+	col.distance = minT;
+
 	vec3 offsetRayOrigin = ray.origin - sphere.location;
 
 	float a = dot(ray.direction, ray.direction);
@@ -119,7 +136,7 @@ RayCollision RaySphereIntersection(Ray ray, Sphere sphere) {
 
 	if(discriminant >= 0) {
 		float distance = (-b - sqrt(discriminant)) / (2 * a);
-		if(distance >= 0) {
+		if(distance >= 0 && distance < minT) {
 			col.hit = true;
 			col.distance = distance;
 			col.point = ray.origin + (normalize(ray.direction) * distance);
@@ -137,6 +154,34 @@ RayCollision RaySphereIntersection(Ray ray, Sphere sphere) {
 	return col;
 }
 
+//https://stackoverflow.com/a/42752998
+RayCollision RayTriangleIntersection(Ray ray, Triangle triangle, float minT) {
+	RayCollision col;
+	col.distance = minT;
+
+	vec3 E1 = triangle.b-triangle.a;
+    vec3 E2 = triangle.c-triangle.a;
+    vec3 normal = cross(E1,E2);
+    float det = -dot(ray.direction, normal);
+    float invdet = 1.0/det;
+    vec3 AO  = ray.origin - triangle.a;
+    vec3 DAO = cross(AO, ray.direction);
+    float u =  dot(E2,DAO) * invdet;
+    float v = -dot(E1,DAO) * invdet;
+    float t =  dot(AO,normal)  * invdet;
+
+	col.hit = (det >= 1e-6 && t >= 0.0 && t < minT && u >= 0.0 && v >= 0.0 && (u+v) <= 1.0);
+	col.distance = t;
+	col.point = ray.origin + (normalize(ray.direction) * t);
+	col.normal = normalize(normal);
+	col.diffuseColor = triangle.diffuseColor;
+	col.emissionColor = triangle.emissionColor;
+	col.emissionStrength = triangle.emissionStrength;
+	col.reflectivity = triangle.reflectivity;
+
+    return col;
+}
+
 RayCollision RayWorldIntersection(Ray ray) {
 	RayCollision nearest;
 	nearest.hit = false;
@@ -144,12 +189,22 @@ RayCollision RayWorldIntersection(Ray ray) {
 
 	for(int i = 0; i < numSpheres; i++) {
 		Sphere sphere = spheres[i];
-		RayCollision col = RaySphereIntersection(ray, sphere);
-
+		RayCollision col = RaySphereIntersection(ray, sphere, nearest.distance);
+		
 		if(col.hit && col.distance < nearest.distance) {
 			nearest = col;
 		}
 	}
+
+	for(int i = 0; i < numTriangles; i++) {
+		Triangle triangle = triangles[i];
+		RayCollision col = RayTriangleIntersection(ray, triangle, nearest.distance);
+		
+		if(col.hit && col.distance < nearest.distance) {
+			nearest = col;
+		}
+	}
+	
 	return nearest;
 };
 

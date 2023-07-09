@@ -17,7 +17,7 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 
 file(GLOB SOURCES *.cpp)
 
-add_compile_options(-Wall -std=c++20 -march=native -fno-omit-frame-pointer)
+add_compile_options(-Wall -std=c++20 -O3 -march=native -fno-omit-frame-pointer)
 
 add_executable( OpenGLRayTracer ${SOURCES} )
 

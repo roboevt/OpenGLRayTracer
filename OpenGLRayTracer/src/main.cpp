@@ -1,32 +1,27 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+
 #include "Engine.h"
 #include "Camera.h"
 #include "World.h"
 #include "shaderBackup.h"
 
-#define VERTEX_SOURCE 2
-#define RAY_FRAGMENT_SOURCE 3
-#define SCREEN_FRAGMENT_SOURCE 4
-
-constexpr auto ROOT = "/home/roboevt/dev/c++/OpenGLRayTracer/OpenGLRayTracer/";
+constexpr auto ROOT_DIR = "/home/roboevt/dev/c++/OpenGLRayTracer/OpenGLRayTracer/";
 
 int main() {
     Engine engine = Engine();
-
     World world = World();
 
-    //Shader rayShader = Shader("res/shaders/vertex.glsl", "res/shaders/rayTrace.frag");
-    //Shader screenShader = Shader("res/shaders/vertex.glsl", "res/shaders/screen.frag"); 
-
-    const std::string vertexCode = ROOT + std::string("res/shaders/vertex.glsl");
-    const std::string rayFragmentCode = ROOT + std::string("res/shaders/rayTrace.frag");
-    const std::string screenFragmentCode = ROOT + std::string("res/shaders/screen.frag");
+    const std::string vertexCode = ROOT_DIR + std::string("res/shaders/vertex.glsl");
+    const std::string rayFragmentCode = ROOT_DIR + std::string("res/shaders/rayTrace.frag");
+    const std::string screenFragmentCode = ROOT_DIR + std::string("res/shaders/screen.frag");
 
     Shader rayShader = Shader(vertexCode, rayFragmentCode);
-    Shader screenShader = Shader(vertexCode, screenFragmentCode); 
+    Shader screenShader = Shader(vertexCode, screenFragmentCode);
 
+    // Load backup shaders if files are not found
     if (!rayShader) rayShader.create(vertexBackup, rayFragmentBackup);
     if (!screenShader) screenShader.create(vertexBackup, screenFragmentBackup);
     
@@ -34,43 +29,25 @@ int main() {
 
     engine.setWindowSize(1920, 1080);
 
-    Sphere sphere1;
-    sphere1.worldLocation = glm::vec3(2);
-    sphere1.radius = .5;
-    sphere1.material.diffuseColor = glm::vec3(0);
-    sphere1.material.emissionColor = glm::vec3(1);
-    sphere1.material.emissionStrength = 16;
+    world.addSpheres(World::createSphereTestScene());
 
-    Sphere sphere2;
-    sphere2.worldLocation = glm::vec3(0, 1, 6);
-    sphere2.radius = 1;
-    sphere2.material.diffuseColor = glm::vec3(1);
-    sphere2.material.emissionColor = glm::vec3(1);
-    sphere2.material.reflectivity = .99;
+    // Create mirror plane square
+    Triangle triangle1;
+    triangle1.a = glm::vec3(-5, 0, -2);
+    triangle1.b = glm::vec3(5, 0, -2);
+    triangle1.c = glm::vec3(-5, 5, -2);
+    triangle1.material.diffuseColor = glm::vec3(0.9, 0.9, 0.9);
+    triangle1.material.emissionColor = glm::vec3(0, 0, 0);
+    triangle1.material.emissionStrength = 0;
+    triangle1.material.reflectivity = 1;
 
-    Sphere sphere3;
-    sphere3.worldLocation = glm::vec3(0, -10000, 6);
-    sphere3.radius = 10000;
-    sphere3.material.diffuseColor = glm::vec3(.2, .2, .2);
-    sphere3.material.emissionColor = glm::vec3(1);
+    Triangle triangle2 = triangle1;
+    triangle2.a = glm::vec3(5, 5, -2);
+    triangle2.b = glm::vec3(-5, 5, -2);
+    triangle2.c = glm::vec3(5, 0, -2);
 
-    Sphere sphere4;
-    sphere4.worldLocation = glm::vec3(1, .5, 5);
-    sphere4.radius = .5;
-    sphere4.material.diffuseColor = glm::vec3(1, .2, .2);
-    sphere4.material.emissionColor = glm::vec3(1);
-
-    Sphere sphere5;
-    sphere5.worldLocation = glm::vec3(2.5, .5, 4.4);
-    sphere5.radius = .5;
-    sphere5.material.diffuseColor = glm::vec3(.3, .4, .9);
-    sphere5.material.emissionColor = glm::vec3(1);
-
-    world.addObject(std::make_unique<Sphere>(sphere1));
-    world.addObject(std::make_unique<Sphere>(sphere2));
-    world.addObject(std::make_unique<Sphere>(sphere3));
-    world.addObject(std::make_unique<Sphere>(sphere4));
-    world.addObject(std::make_unique<Sphere>(sphere5));
+    world.addTriangle(triangle1);
+    world.addTriangle(triangle2);
 
     while (!engine.draw()) {
         engine.update();

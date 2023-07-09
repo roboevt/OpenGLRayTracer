@@ -13,7 +13,7 @@
 class Engine {
 private:
 	GLFWwindow* window;
-	int windowWidth, windowHeight;
+	int windowWidth, windowHeight, lastWindowedWidth, lastWindowedHeight;
 	int samples;
 
 	unsigned int fbo, bufferTexture;
@@ -31,7 +31,7 @@ private:
 
 	int createFBO();
 
-	void updateKeyboard();
+	void moveCamera();
 	void updateUniforms();
 	void updateFPS();
 
@@ -42,7 +42,7 @@ public:
 	~Engine();
 	int draw();
 	void update();
-	void moveCamera(float newX, float newY);
+	void rotateCamera(float newX, float newY);
 	float getLastFrametime();
 	float getTime();
 	glm::mat4 getViewMatrix();

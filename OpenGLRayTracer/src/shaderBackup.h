@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_BACKUP_H
+#define SHADER_BACKUP_H
 
 const std::string vertexBackup = R"(
 #version 330 core
@@ -34,6 +35,7 @@ struct Sphere {
 	vec3 diffuseColor;
 	vec3 emissionColor;
 	float emissionStrength;
+	float reflectivity;
 };
 
 uniform Sphere spheres[10];
@@ -54,6 +56,7 @@ struct RayCollision {
 	vec3 diffuseColor;
 	vec3 emissionColor;
 	float emissionStrength;
+	float reflectivity;
 };
 
 uint NextRandom(inout uint state) {
@@ -139,6 +142,7 @@ RayCollision RaySphereIntersection(Ray ray, Sphere sphere) {
 			col.diffuseColor = sphere.diffuseColor;
 			col.emissionColor = sphere.emissionColor;
 			col.emissionStrength = sphere.emissionStrength;
+			col.reflectivity = sphere.reflectivity;
 		} else {
 			col.hit = false;
 		}
@@ -172,7 +176,9 @@ vec3 trace(Ray ray, inout uint state) {
 		RayCollision col = RayWorldIntersection(ray);
 		if(col.hit) {
 			ray.origin = col.point;
-			ray.direction = normalize(col.normal + randDirection(state));
+			vec3 diffuseDirection = normalize(col.normal + randDirection(state));
+			vec3 specularDirection = reflect(ray.direction, col.normal);
+			ray.direction = mix(diffuseDirection, specularDirection, col.reflectivity);
 
 			vec3 emittedLight = col.emissionColor * col.emissionStrength;
 			incomingLight += emittedLight * rayColor;
@@ -213,4 +219,7 @@ uniform uint frames;  // frames since last movement
 void main() { 
     color = texture(screenTexture, gl_FragCoord.xy / uResolution) / int(frames);
 }
+
 )";
+
+#endif //SHADER_BACKUP_H
