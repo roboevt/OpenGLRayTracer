@@ -1,7 +1,6 @@
 #include "World.h"
 
 #include "stl_reader.h"
-#include <iostream>
 
 void World::updateShaderObjectCount(const std::string& field, const int shader, const int count) const {
 	int loc = glGetUniformLocation(shader, field.c_str());
@@ -17,9 +16,9 @@ void World::updateShader(int shader) {
 	i = 0;
 	for (const Triangle& triangle : triangles) {
 		triangle.sendToShader(shader, i++);
-		if(i > 100) break;
+		if(i > 128) break;  // TODO find a better way (not uniforms) to transfer triangles to shader
 	}
-	updateShaderObjectCount("numTriangles", shader, i);
+	updateShaderObjectCount("numTriangles", shader, i);\
 }
 
 void World::applyMVP(glm::mat4 mvp) {
@@ -38,17 +37,15 @@ void World::addStl(std::string path) {
 		const float* v1 = mesh.tri_corner_coords(i, 0);
 		const float* v2 = mesh.tri_corner_coords(i, 1);
 		const float* v3 = mesh.tri_corner_coords(i, 2);
-		triangle.a  = glm::vec3(v1[0], v1[1], v1[2]);
-		triangle.b  = glm::vec3(v2[0], v2[1], v2[2]);
-		triangle.c  = glm::vec3(v3[0], v3[1], v3[2]);
-		std::cout << triangle.a.x << " " << triangle.a.y << " " << triangle.a.z << std::endl;
+		triangle.a  = glm::vec3(v1[0], v1[1] + 1, v1[2] + 2);
+		triangle.b  = glm::vec3(v2[0], v2[1] + 1, v2[2] + 2);
+		triangle.c  = glm::vec3(v3[0], v3[1] + 1, v3[2] + 2);
 		triangle.material.diffuseColor = glm::vec3(1);
 		triangle.material.emissionColor = glm::vec3(0);
 		triangle.material.emissionStrength = 0;
 		triangle.material.reflectivity = 0;
 		addTriangle(triangle);
 	}
-	std::cout << "Added " << mesh.num_tris() << " triangles from " << path << std::endl;
 }
 
 std::vector<Sphere> World::createSphereTestScene() {
@@ -89,18 +86,18 @@ std::vector<Sphere> World::createSphereTestScene() {
 
 std::vector<Triangle> World::createTestMirror() {
 	    Triangle triangle1;
-    triangle1.a = glm::vec3(-5, 0, -2);
-    triangle1.b = glm::vec3(5, 0, -2);
-    triangle1.c = glm::vec3(-5, 5, -2);
+    triangle1.a = glm::vec3(-5, 0, -1);
+    triangle1.b = glm::vec3(5, 0, -1);
+    triangle1.c = glm::vec3(-5, 5, -1);
     triangle1.material.diffuseColor = glm::vec3(0.9, 0.9, 0.9);
     triangle1.material.emissionColor = glm::vec3(0, 0, 0);
     triangle1.material.emissionStrength = 0;
     triangle1.material.reflectivity = 1;
 
     Triangle triangle2 = triangle1;
-    triangle2.a = glm::vec3(5, 5, -2);
-    triangle2.b = glm::vec3(-5, 5, -2);
-    triangle2.c = glm::vec3(5, 0, -2);
+    triangle2.a = glm::vec3(5, 5, -1);
+    triangle2.b = glm::vec3(-5, 5, -1);
+    triangle2.c = glm::vec3(5, 0, -1);
 
 	return {triangle1, triangle2};
 }

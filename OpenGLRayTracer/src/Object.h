@@ -37,8 +37,8 @@ struct Sphere : Object {
 };
 
 struct Triangle : Object {
-	glm::vec3 a, b, c;
-	glm::vec3 cA, cB, cC;
+	glm::vec3 a, b, c;    // World space
+	glm::vec3 cA, cB, cC; // Camera space
 	Material material;
 	static const std::string shaderBuffer;
 

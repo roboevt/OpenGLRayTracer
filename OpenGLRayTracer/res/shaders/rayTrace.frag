@@ -35,10 +35,10 @@ struct Triangle {
 	float reflectivity;
 };
 
-uniform Sphere spheres[100];
+uniform Sphere spheres[10];
 uniform int numSpheres;
 
-uniform Triangle triangles[10];
+uniform Triangle triangles[128];
 uniform int numTriangles;
 
 struct Ray {
@@ -157,7 +157,7 @@ RayCollision RaySphereIntersection(Ray ray, Sphere sphere, float minT) {
 //https://stackoverflow.com/a/42752998
 RayCollision RayTriangleIntersection(Ray ray, Triangle triangle, float minT) {
 	RayCollision col;
-	col.distance = minT;
+	//col.distance = minT;
 
 	vec3 E1 = triangle.b-triangle.a;
     vec3 E2 = triangle.c-triangle.a;
@@ -203,6 +203,8 @@ RayCollision RayWorldIntersection(Ray ray) {
 		if(col.hit && col.distance < nearest.distance) {
 			nearest = col;
 		}
+		if(i > 19) nearest.diffuseColor = vec3(1,0,1);
+		
 	}
 	
 	return nearest;

@@ -31,7 +31,6 @@ int main() {
 
     world.addSpheres(World::createSphereTestScene());
     world.addTriangles(World::createTestMirror());
-
     world.addStl("basic.stl");
 
     while (!engine.draw()) {
