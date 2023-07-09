@@ -9,3 +9,19 @@ From root project directory (highest level):
 cmake -B build -S ./src/ -DCMAKE_TOOLCHAIN_FILE=/home/roboevt/dev/c++/OpenGLRayTracer/OpenGLRayTracer/vcpkg/scripts/buildsystems/vcpkg.cmake
 cmake --build ./build/ --parallel 12
 ```
+## Controls
+### Camera
+W: Forward \
+A: Left \
+S: Backward \
+D: Right
+ \
+Shift: Upward \
+Control: Downward \
+Mouse: Direction \
+### System
+F11: Fullscreen \
++: More samples/frame
+-: Fewer samples/frame
+esc: Free mouse
+Alt+F4: Exit
